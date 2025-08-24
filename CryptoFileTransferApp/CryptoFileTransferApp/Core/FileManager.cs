@@ -17,7 +17,6 @@ namespace CryptoFileTransferApp.Core
             }
             catch (Exception ex)
             {
-                // Možeš logovati grešku ili obavestiti korisnika
                 Console.WriteLine($"Error saving to file: {ex.Message}");
                 throw;
             }
@@ -40,4 +39,5 @@ namespace CryptoFileTransferApp.Core
         }
     }
 }
+
 
