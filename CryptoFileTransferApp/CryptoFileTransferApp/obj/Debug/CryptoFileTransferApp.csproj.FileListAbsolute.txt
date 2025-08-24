@@ -1,0 +1,10 @@
+F:\FAKS\IV godina\Zastita informacija\Projekat2025\CryptoFileTransferApp\CryptoFileTransferApp\bin\Debug\CryptoFileTransferApp.exe.config
+F:\FAKS\IV godina\Zastita informacija\Projekat2025\CryptoFileTransferApp\CryptoFileTransferApp\bin\Debug\CryptoFileTransferApp.exe
+F:\FAKS\IV godina\Zastita informacija\Projekat2025\CryptoFileTransferApp\CryptoFileTransferApp\bin\Debug\CryptoFileTransferApp.pdb
+F:\FAKS\IV godina\Zastita informacija\Projekat2025\CryptoFileTransferApp\CryptoFileTransferApp\obj\Debug\CryptoFileTransferApp.csproj.AssemblyReference.cache
+F:\FAKS\IV godina\Zastita informacija\Projekat2025\CryptoFileTransferApp\CryptoFileTransferApp\obj\Debug\CryptoFileTransferApp.Properties.Resources.resources
+F:\FAKS\IV godina\Zastita informacija\Projekat2025\CryptoFileTransferApp\CryptoFileTransferApp\obj\Debug\CryptoFileTransferApp.MainForm.resources
+F:\FAKS\IV godina\Zastita informacija\Projekat2025\CryptoFileTransferApp\CryptoFileTransferApp\obj\Debug\CryptoFileTransferApp.csproj.GenerateResource.cache
+F:\FAKS\IV godina\Zastita informacija\Projekat2025\CryptoFileTransferApp\CryptoFileTransferApp\obj\Debug\CryptoFileTransferApp.csproj.CoreCompileInputs.cache
+F:\FAKS\IV godina\Zastita informacija\Projekat2025\CryptoFileTransferApp\CryptoFileTransferApp\obj\Debug\CryptoFileTransferApp.exe
+F:\FAKS\IV godina\Zastita informacija\Projekat2025\CryptoFileTransferApp\CryptoFileTransferApp\obj\Debug\CryptoFileTransferApp.pdb

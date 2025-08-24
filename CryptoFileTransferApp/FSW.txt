@@ -1,0 +1,196 @@
+private WatcherService watcherService;
+
+public MainForm()
+{
+    InitializeComponent();
+    watcherService = new WatcherService(targetFolder);
+    watcherService.FileCreated += OnFileCreated;
+   
+}
+
+ova funkcija ti radi kriptvanje smesta u folder x i radi updejtuje listview to moze stavis i ne moras 
+  private void OnFileCreated(string path)
+  {
+      string fileName = Path.GetFileName(path);
+      Invoke(new Action(() =>
+      {
+          if (isRC6)
+              listViewFSWRC6.Items.Add(fileName);
+          else
+              listViewFSWPlayFair.Items.Add(fileName);
+      }));
+
+      Thread t = new Thread(() =>
+      {
+          Thread.Sleep(200); 
+
+          try
+          {
+              if (isRC6)
+              {
+
+                  string key = (string)txtBoxRC6Key.Invoke(new Func<string>(() => txtBoxRC6Key.Text));
+
+                  if (string.IsNullOrWhiteSpace(key))
+                  {
+                      // Generise random kljuc 16 bajtova = 128-bitni
+                      using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+                      {
+                          byte[] randomKey = new byte[16];
+                          rng.GetBytes(randomKey);
+                          key = Convert.ToBase64String(randomKey);
+
+                          
+                          Invoke(new Action(() =>
+                          {
+                              txtBoxRC6Key.Text = key;
+                          }));
+                      }
+                  }
+
+                  byte[] keyBytes = Encoding.UTF8.GetBytes(key);
+                  bool pcbcChecked = (bool)checkBoxPCBC.Invoke(new Func<bool>(() => checkBoxPCBC.Checked));
+
+                  byte[] data = File.ReadAllBytes(path);
+                  byte[] encrypted;
+                  byte[] iv = null;
+
+                  if (pcbcChecked)
+                  {
+                      (encrypted, iv) = PCBC.Encrypt(data, keyBytes);
+
+                      byte[] finalData = new byte[iv.Length + encrypted.Length];
+                      Buffer.BlockCopy(iv, 0, finalData, 0, iv.Length);
+                      Buffer.BlockCopy(encrypted, 0, finalData, iv.Length, encrypted.Length);
+                      encrypted = finalData;
+                  }
+                  else
+                  {
+                      RC6 rc6 = new RC6(keyBytes);
+                      encrypted = rc6.Encrypt(data);
+                  }
+
+                  string nameOnly = Path.GetFileNameWithoutExtension(path);
+                  string extension = Path.GetExtension(path);
+
+                  string encryptedPath;
+                  if (pcbcChecked)
+                      encryptedPath = Path.Combine(encryptedFolderX, $"{nameOnly}{extension}.rc6mod");
+                  else
+                      encryptedPath = Path.Combine(encryptedFolderX, $"{nameOnly}{extension}.rc6");
+
+                  File.WriteAllBytes(encryptedPath, encrypted);
+
+                
+                  string keyPath = Path.Combine(encryptedFolderX, $"{nameOnly}.key");
+                  File.WriteAllText(keyPath, key);
+
+                  Invoke(new Action(() =>
+                  {
+                      statusLabelRC6.Text = $"RC6 fajl {fileName} uspešno enkriptovan i sačuvan kao {encryptedPath}\nKljuc sacuvan u {keyPath}";
+                  }));
+              }
+              else
+              {
+                  string content = File.ReadAllText(path);
+                  string key = (string)txtBoxPFCKey.Invoke(new Func<string>(() => txtBoxPFCKey.Text));
+                  string encrypted = PlayfairCipher.Encrypt(content, key);
+
+                  string outputPath = Path.Combine(encryptedFolderX, fileName);
+                  File.WriteAllText(outputPath, key + Environment.NewLine + encrypted);
+
+                  Invoke(new Action(() =>
+                  {
+                      statusLabelRC6.Text = $"Playfair fajl {fileName} uspešno enkriptovan i sačuvan kao {outputPath}";
+                  }));
+              }
+          }
+          catch (Exception ex)
+          {
+              Invoke(new Action(() =>
+              {
+                  MessageBox.Show("Greška prilikom obrade fajla: " + ex.Message,
+                      "Greška!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+              }));
+          }
+      });
+      t.Start();
+  }
+
+palis i gasis ako je cekiran fsw sa .Start() i . Stop()
+private void checkBoxFSW_CheckedChanged(object sender, EventArgs e)
+{
+    if (checkBoxFSWPlayFC.Checked && !checkBoxFileTPlayFC.Checked)
+    {
+        LoadExistingFiles();
+        watcherService.Start();
+        Visibility(true,false);
+        SetSize(700, 870);
+    }
+    else if (checkBoxFSWPlayFC.Checked && checkBoxFileTPlayFC.Checked)
+    {
+        LoadExistingFiles();
+        watcherService.Start();
+        Visibility(true, true);
+        SetSize(700, 870);
+    }
+    else if (!checkBoxFSWPlayFC.Checked && checkBoxFileTPlayFC.Checked)
+    {
+        watcherService.Stop();
+        listViewFSWPlayFair.Items.Clear();
+        Visibility(false, true);
+        SetSize(700, 870);
+    }
+    else
+    {
+        watcherService.Stop();
+        listViewFSWPlayFair.Items.Clear();
+        Visibility(false,false);
+        SetSize(540, 480);
+    }
+}
+
+
+
+ovo je klasa prati sva desvanja sve kesztezije * koje se pojave u folder i zove fukciju za kreiranje ako se nesto pojavi
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CryptoFileTransferApp.Core
+{
+    public class WatcherService
+    {
+        private readonly FileSystemWatcher _watcher;
+
+        public event Action<string> FileCreated;
+
+        public WatcherService(string path)
+        {
+            _watcher = new FileSystemWatcher(path, "*.*")    
+            {
+                NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite
+            };
+
+            // Kad se novi fajl pojavi
+            _watcher.Created += (s, e) =>
+            {
+                try
+                {
+                    FileCreated?.Invoke(e.FullPath);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Greška u WatcherService: {ex.Message}");
+                }
+            };
+        }
+
+        public void Start() => _watcher.EnableRaisingEvents = true;
+        public void Stop() => _watcher.EnableRaisingEvents = false;
+    }
+}
