@@ -20,10 +20,10 @@ namespace CryptoFileTransferApp.Core
                 NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite
             };
 
-            // Kad se novi fajl pojavi
+
             _watcher.Created += (s, e) =>
             {
-                // Malo sačekamo da OS završi sa pisanjem fajla
+
                 try
                 {
                     FileCreated?.Invoke(e.FullPath);
@@ -39,3 +39,4 @@ namespace CryptoFileTransferApp.Core
         public void Stop() => _watcher.EnableRaisingEvents = false;
     }
 }
+
